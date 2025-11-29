@@ -1,0 +1,37 @@
+{% set name = "primeforge" %}
+{% set version = "0.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/omniscoder/primeforge.git
+  git_rev: main
+
+build:
+  number: 0
+  script: python -m pip install . --no-deps --ignore-installed -vv
+
+requirements:
+  host:
+    - python >=3.9
+    - pip
+    - scikit-build-core >=0.9
+    - cmake >=3.20
+    - ninja
+    - pybind11 >=2.11
+  run:
+    - python >=3.9
+
+about:
+  home: https://github.com/omniscoder/primeforge
+  license: MIT
+  license_family: MIT
+  summary: Deterministic prime editing design core with optional CUDA backends
+  description: |
+    primeforge provides a C++ prime-edit design engine with Python bindings. CPU wheels are default; build from source with nvcc to enable CUDA backends.
+
+extra:
+  recipe-maintainers:
+    - omniscode

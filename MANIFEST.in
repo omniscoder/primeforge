@@ -1,0 +1,7 @@
+include README.md
+recursive-include primeforge-core *.hpp *.cpp *.cu CMakeLists.txt
+recursive-include python *.py *.cpp CMakeLists.txt pyproject.toml
+recursive-include data *.json
+graft docs
+prune build
+prune .venv

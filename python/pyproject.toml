@@ -1,18 +1,42 @@
 [build-system]
-requires = ["setuptools>=64", "wheel", "pybind11>=2.11"]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core>=0.9.0", "pybind11>=2.11", "setuptools-scm"]
+build-backend = "scikit_build_core.build"
 
 [project]
 name = "primeforge"
 version = "0.1.0"
 description = "Deterministic prime editing design core with optional CUDA backends"
+readme = "../README.md"
 authors = [{ name = "Primeforge Contributors" }]
 license = { text = "MIT" }
 requires-python = ">=3.9"
 dependencies = []
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: C++",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
 
 [project.urls]
-Homepage = "https://github.com/omniscode/primeforge"
+Homepage = "https://github.com/omniscoder/primeforge"
+Source = "https://github.com/omniscoder/primeforge"
+Issues = "https://github.com/omniscoder/primeforge/issues"
 
-[tool.setuptools.packages.find]
-where = ["primeforge"]
+[tool.scikit-build]
+cmake.verbose = false
+cmake.minimum-version = "3.20"
+cmake.args = [
+  "-DPRIMEFORGE_ENABLE_CUDA=OFF",
+  "-DPRIMEFORGE_BUILD_PYTHON=ON",
+  "-DPRIMEFORGE_BUILD_BENCHMARKS=OFF",
+  "-DPRIMEFORGE_RUN_BENCH=OFF"
+]
+ninja.minimum-version = "1.10"
+wheel.packages = ["primeforge"]
