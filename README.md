@@ -1,12 +1,11 @@
 # primeforge
 
-Deterministic prime-editing design core in modern C++ with a thin Python API. v0.1 focuses on clean data models, pegRNA/NGG design logic for PE2/PE3, and batch-friendly interfaces. CPU-first, with optional CUDA backends planned for genome-scale PAM scans and batched scoring.
+Prime editing design SDK: modern C++ core + thin Python API, with deterministic pegRNA / nicking-guide enumeration for PE2/PE3 and batch-friendly data models. v0.1 is CPU-first and pure logic; CUDA backends are available for high-throughput PAM scanning and will later host thermodynamics/ML scoring.
 
 ## Status
-- Core scaffolding, device abstraction, and CPU utilities in place.
-- Deterministic pegRNA enumeration supports plus/minus strands, PBS/RTT ranges, and optional PE3 companion nicking guides.
-- CUDA is disabled by default; enable with `-DPRIMEFORGE_ENABLE_CUDA=ON` once GPU kernels land.
-- Python bindings are stubbed to mirror the C++ API shape.
+- Core C++ library with explicit edit model (subs/ins/del), strand-aware design, PBS/RTT heuristics, and optional PE3 companion guides.
+- Python bindings and dataclasses mirror the C++ API.
+- CUDA PAM scanner available (opt-in); benchmarks included. Scoring/thermo GPU kernels come next.
 
 ## Build (C++)
 ```bash
@@ -38,6 +37,18 @@ cmake --build build --target bench_pam
 # Recent run (GTX 1060, NGG, 5 Mb): CPU ~12 Mb/s, CUDA ~19 Mb/s (post warm-up)
 ```
 To gate benchmarks in CI: add `-DPRIMEFORGE_RUN_BENCH=ON` (requires CUDA build) and ctest will run a short CUDA PAM check.
+
+## Features (v0.1)
+- Typed edit specs (substitution/insertion/deletion) with strand awareness.
+- pegRNA assembly: spacer, PAM cut logic, PBS/RTT enumeration, GC heuristics, distance flags.
+- Optional PE3 companion nicking guide selection with configurable PAM motifs.
+- Batch APIs for large edit sets; zero I/O in the core.
+- CUDA hook points for PAM scanning (present) and future scoring/thermo kernels.
+
+## Roadmap
+- GPU-optimized thermodynamics + secondary-structure heuristics.
+- Plug-in scoring interface (EasyPrime/OPED/etc.).
+- Library-scale workflows and genome-provider abstractions.
 
 ## Design goals
 - Explicit edit model (subs/ins/del) instead of magic strings.
