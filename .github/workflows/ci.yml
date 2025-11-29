@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Configure
-        run: cmake -S . -B build -DPRIMEFORGE_ENABLE_CUDA=OFF -DBUILD_TESTING=ON
+        run: cmake -S . -B build -DPRIMEFORGE_ENABLE_CUDA=OFF -DBUILD_TESTING=ON -DPRIMEFORGE_RUN_BENCH=OFF
       - name: Build
         run: cmake --build build --config Release
       - name: Test
