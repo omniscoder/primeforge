@@ -3,7 +3,7 @@ project(primeforge LANGUAGES CXX)
 
 option(PRIMEFORGE_ENABLE_CUDA "Enable CUDA backends" OFF)
 option(PRIMEFORGE_BUILD_PYTHON "Build Python bindings" OFF)
-option(PRIMEFORGE_RUN_BENCH "Run benchmark checks in ctest (requires CUDA when enabled)" OFF)
+option(PRIMEFORGE_RUN_BENCH "Run benchmark checks in ctest (requires CUDA when enabled)" ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
