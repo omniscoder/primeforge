@@ -1,0 +1,6 @@
+{
+  "name": "SpCas9-H840A PE2",
+  "pam": "NGG",
+  "cut_offset": 3,
+  "notes": "PE2 baseline editor; PE3 uses nicking sgRNA in addition."
+}
