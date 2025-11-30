@@ -1,4 +1,4 @@
-"""primeforge Python bindings (stub).
+"""primeedit Python bindings (stub).
 
 CPU-first deterministic prime editing design. CUDA backends are optional and
 will be enabled when the extension is built with `PRIMEFORGE_ENABLE_CUDA`.

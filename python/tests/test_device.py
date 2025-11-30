@@ -2,7 +2,7 @@ import pytest
 
 pytest.importorskip("primeforge_bindings")
 
-from primeforge import Device, DeviceType, is_cuda_available
+from primeedit import Device, DeviceType, is_cuda_available
 
 
 def test_device_helpers():

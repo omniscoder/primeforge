@@ -2,7 +2,7 @@ import pytest
 
 pytest.importorskip("primeforge_bindings")
 
-from primeforge import (
+from primeedit import (
     DesignConfig,
     Device,
     EditSubstitution,

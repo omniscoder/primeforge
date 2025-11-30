@@ -39,4 +39,4 @@ cmake.args = [
   "-DPRIMEFORGE_RUN_BENCH=OFF"
 ]
 ninja.minimum-version = "1.10"
-wheel.packages = ["python/primeforge"]
+wheel.packages = ["python/primeedit"]
