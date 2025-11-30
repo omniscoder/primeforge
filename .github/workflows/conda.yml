@@ -1,0 +1,48 @@
+name: conda
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'conda/**'
+      - '.github/workflows/conda.yml'
+  pull_request:
+    paths:
+      - 'conda/**'
+      - '.github/workflows/conda.yml'
+
+jobs:
+  conda-build:
+    runs-on: ubuntu-latest
+    env:
+      ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: build-env
+          auto-update-conda: true
+          python-version: 3.11
+          channels: conda-forge,defaults
+      - name: Install conda-build
+        shell: bash -l {0}
+        run: conda install -y conda-build anaconda-client
+      - name: Build recipe
+        shell: bash -l {0}
+        run: conda build conda --output-folder /tmp/conda-bld
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: conda-bld
+          path: /tmp/conda-bld/**/*.tar.bz2
+      - name: Upload to Anaconda
+        if: env.ANACONDA_TOKEN != ''
+        shell: bash -l {0}
+        env:
+          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+        run: |
+          conda build conda --output-folder /tmp/conda-bld --output > pkgs.txt
+          while read -r pkg; do
+            echo "Uploading $pkg"
+            anaconda -t "$ANACONDA_TOKEN" upload --skip-existing "$pkg"
+          done < pkgs.txt

@@ -1,152 +1,45 @@
-name: Release
+name: release
 
 on:
   push:
     tags:
-      - 'v*'
+      - "v*.*.*"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
 
 jobs:
-  build-wheels:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-13]
-    env:
-      CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
-      CIBW_SKIP: "*-musllinux_*"
-      CIBW_TEST_COMMAND: "python -c \"import primeedit; print('import ok')\""
-      CIBW_ENVIRONMENT: "PRIMEFORGE_ENABLE_CUDA=OFF PRIMEFORGE_BUILD_BENCHMARKS=OFF PRIMEFORGE_RUN_BENCH=OFF"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install build deps
-        run: python -m pip install --upgrade pip cibuildwheel==2.19.0
-
-      - name: Build wheels
-        run: |
-          cd python
-          cibuildwheel --output-dir ../wheelhouse
-
-      - name: Upload wheels artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels-${{ matrix.os }}
-          path: wheelhouse/*.whl
-
-  sdist:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-
-      - name: Build sdist
-        run: |
-          python -m pip install --upgrade pip build
-          cd python
-          python -m build --sdist -o ../dist
-
-      - name: Upload sdist artifact
-        uses: actions/upload-artifact@v4
+          python-version: "3.11"
+      - run: pip install build
+      - name: Build sdist only (CPU-only to avoid CUDA dependency)
+        run: python -m build --sdist
+        env:
+          SKBUILD_CONFIGURE_OPTIONS: "-DCRISPR_GPU_ENABLE_CUDA=OFF"
+      - uses: actions/upload-artifact@v4
         with:
-          name: sdist
-          path: dist/*.tar.gz
+          name: dist
+          path: dist/*
 
-  publish:
-    needs: [build-wheels, sdist]
+  publish-pypi:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, 'rc') && !contains(github.ref_name, 'a') && !contains(github.ref_name, 'b')
     runs-on: ubuntu-latest
     permissions:
-      contents: write
       id-token: write
+      contents: read
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: wheels-ubuntu-latest
-          path: wheelhouse
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: wheels-macos-13
-          path: wheelhouse
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: sdist
+          name: dist
           path: dist
-
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.9.0
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip-existing: true
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            wheelhouse/*.whl
-            dist/*.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  conda:
-    runs-on: ubuntu-latest
-    env:
-      ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-    strategy:
-      matrix:
-        include:
-          - name: cpu
-            cuda: "false"
-            label: main
-          - name: cuda
-            cuda: "true"
-            label: cuda
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          activate-environment: build
-          python-version: "3.11"
-          auto-update-conda: true
-          channels: conda-forge,defaults
-
-      - name: Install build deps
-        shell: bash -l {0}
-        run: |
-          conda install -y conda-build anaconda-client scikit-build-core cmake ninja pybind11
-          if [ "${{ matrix.cuda }}" = "true" ]; then
-            conda install -y cuda-nvcc cudatoolkit=12
-          fi
-
-      - name: Build conda package
-        shell: bash -l {0}
-        run: |
-          if [ "${{ matrix.cuda }}" = "true" ]; then
-            export CMAKE_ARGS="-DPRIMEFORGE_ENABLE_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=70 -DPRIMEFORGE_BUILD_BENCHMARKS=OFF -DPRIMEFORGE_RUN_BENCH=OFF -DPRIMEFORGE_BUILD_PYTHON=ON"
-          else
-            export CMAKE_ARGS="-DPRIMEFORGE_ENABLE_CUDA=OFF -DPRIMEFORGE_BUILD_BENCHMARKS=OFF -DPRIMEFORGE_RUN_BENCH=OFF -DPRIMEFORGE_BUILD_PYTHON=ON"
-          fi
-          conda build conda/recipe --output-folder conda-build
-
-      - name: Upload to Anaconda
-        if: env.ANACONDA_TOKEN != ''
-        shell: bash -l {0}
-        run: |
-          LABELS="${{ matrix.label }}"
-          anaconda -t "$ANACONDA_TOKEN" upload conda-build/*/*.tar.bz2 --label "$LABELS" --skip-existing
