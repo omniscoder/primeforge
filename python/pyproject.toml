@@ -30,7 +30,7 @@ Source = "https://github.com/omniscoder/primeforge"
 Issues = "https://github.com/omniscoder/primeforge/issues"
 
 [tool.scikit-build]
-cmake.verbose = false
+build.verbose = false
 cmake.minimum-version = "3.20"
 cmake.args = [
   "-DPRIMEFORGE_ENABLE_CUDA=OFF",

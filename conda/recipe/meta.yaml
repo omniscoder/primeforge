@@ -13,6 +13,7 @@ build:
   number: 0
   script: |
     cd python
+    export CMAKE_ARGS="${CMAKE_ARGS:-} -DPRIMEFORGE_ENABLE_CUDA=OFF -DPRIMEFORGE_BUILD_BENCHMARKS=OFF -DPRIMEFORGE_RUN_BENCH=OFF -DPRIMEFORGE_BUILD_PYTHON=ON"
     python -m pip install . --no-deps --ignore-installed -vv
 
 requirements:
