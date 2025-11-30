@@ -31,6 +31,7 @@ jobs:
           CIBW_SKIP: "*-musllinux_*"
           CIBW_TEST_COMMAND: "python -c \"import primeedit; print('import ok')\""
           CIBW_ENVIRONMENT: "PRIMEFORGE_ENABLE_CUDA=OFF PRIMEFORGE_BUILD_BENCHMARKS=OFF PRIMEFORGE_RUN_BENCH=OFF"
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: "auditwheel repair -w {dest_dir} {wheel} || (echo 'auditwheel failed, copying raw wheel' && cp {wheel} {dest_dir})"
       - name: Build conda package (CPU)
         uses: conda-incubator/setup-miniconda@v3
         with:
