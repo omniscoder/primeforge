@@ -41,7 +41,31 @@ jobs:
         with:
           name: dist
           path: dist
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels-ubuntu-latest
+          path: wheelhouse
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels-macos-13
+          path: wheelhouse
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: conda-bld
+          path: conda-artifacts
+        continue-on-error: true
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip-existing: true
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            wheelhouse/*.whl
+            dist/*.tar.gz
+            conda-artifacts/**/*.tar.bz2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
