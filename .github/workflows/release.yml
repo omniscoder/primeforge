@@ -91,3 +91,4 @@ jobs:
             wheelhouse/*.whl
             dist/*.tar.gz
           token: ${{ secrets.GITHUB_TOKEN }}
+          overwrite_files: true
